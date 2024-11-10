@@ -1438,6 +1438,7 @@ async function main() {
     document.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
+
         selectFile(e.dataTransfer.files[0]);
     });
 
