@@ -1,9 +1,10 @@
-Sun Nov 10 11:04:38 UTC 2024: Cleanup data directory - 0s
-Sun Nov 10 11:04:38 UTC 2024: Cleanup model directory - 0s
-Sun Nov 10 11:04:38 UTC 2024: Create data directory - 0s
-Sun Nov 10 11:04:38 UTC 2024: Create input directory - 0s
-Sun Nov 10 11:04:39 UTC 2024: Extract frames from video - 1s
-Sun Nov 10 11:05:24 UTC 2024: Convert frames - 45s
-Sun Nov 10 11:30:37 UTC 2024: Train model - 1513s
-Sun Nov 10 11:31:12 UTC 2024: Compress model - 35s
-Sun Nov 10 11:32:15 UTC 2024: Upload model - 63s
+Sun Nov 10 18:55:45 UTC 2024: Cleanup timing file - 0s
+Sun Nov 10 18:55:45 UTC 2024: Cleanup data directory - 0s
+Sun Nov 10 18:55:45 UTC 2024: Cleanup model directory - 0s
+Sun Nov 10 18:55:45 UTC 2024: Create data directory - 0s
+Sun Nov 10 18:55:45 UTC 2024: Create input directory - 0s
+Sun Nov 10 18:55:50 UTC 2024: Extract frames from video - 5s
+Sun Nov 10 18:56:12 UTC 2024: Convert frames - 22s
+Sun Nov 10 19:00:08 UTC 2024: Train model - 236s
+Sun Nov 10 19:00:20 UTC 2024: Compress model - 12s
+Sun Nov 10 19:00:51 UTC 2024: Upload model - 31s
