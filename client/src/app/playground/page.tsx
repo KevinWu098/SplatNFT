@@ -1,28 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRenderer } from "@/hooks/use-renderer";
 
 export default function Page() {
-    const [htmlContent, setHtmlContent] = useState("");
+    const { renderer } = useRenderer();
 
-    useEffect(() => {
-        async function fetchHtml() {
-            try {
-                const response = await fetch("/og/index.html");
-                const html = await response.text();
-                setHtmlContent(html);
-
-                const script = document.createElement("script");
-                script.src = "/og/main.js";
-                script.async = true;
-                document.body.appendChild(script);
-            } catch (error) {
-                console.error("Error fetching HTML file:", error);
-            }
-        }
-
-        fetchHtml();
-    }, []);
-
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+    return <div dangerouslySetInnerHTML={{ __html: renderer }} />;
 }
