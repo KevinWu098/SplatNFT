@@ -1,4 +1,4 @@
-const { mintNFT } = require('./index');
+import { mintNFT } from './index.js';
 
 async function testMint() {
     const metadataUri = 'ipfs://<YOUR_METADATA_CID>';

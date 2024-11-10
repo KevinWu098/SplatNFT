@@ -2,14 +2,17 @@
   "dependencies": {
     "@metaplex-foundation/js": "^0.20.1",
     "@solana/web3.js": "^1.95.4",
+    "@web3-storage/w3up-client": "^16.4.1",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "nft.storage": "^7.2.0",
+    "web3.storage": "^3.5.7",
     "whatwg-url": "^14.0.0"
   },
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
