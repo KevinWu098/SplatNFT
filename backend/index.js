@@ -6,11 +6,14 @@ import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { Web3Storage, File } from 'web3.storage';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
+import path from 'path';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json()); // To parse JSON
+app.use(cors());
 
 // File upload configuration for multer
 const upload = multer({ dest: 'uploads/' });
@@ -52,10 +55,12 @@ const metaplex = Metaplex.make(connection).use(keypairIdentity(walletKeypair));
 const web3StorageClient = new Web3Storage({ token: WEB3_STORAGE_API_KEY });
 
 // Placeholder for MP4 to PLY conversion
-async function convertMp4ToPly(mp4FilePath) {
-    //Bill's code
-    return plyFilePath;
-}
+// async function convertMp4ToPly(mp4FilePath) {
+//     //Bill's code
+//     // const plyFilePath = path.join('uploads', `${path.basename(mp4FilePath, '.mp4')}.ply`);
+//     const plyFilePath = await convertMp4ToPly(req.file.path);
+//     return plyFilePath;
+// }
 
 // Function to convert PLY file to string
 async function convertPlyToString(plyFilePath) {
@@ -116,11 +121,17 @@ app.post('/mint-nft', upload.single('video'), async (req, res) => {
             return res.status(400).json({ error: 'Missing required field: MP4 video file' });
         }
 
+        const savedVideoPath = path.join('uploads', req.file.originalname);
+        await fs.rename(req.file.path, savedVideoPath);
+        // if (!req.file || req.file.mimetype !== 'video/mp4') {
+        //     return res.status(400).json({ error: 'File is missing or is not an MP4 video' });
+        // }        
+
         // Convert the uploaded MP4 file to PLY format
-        const plyFilePath = await convertMp4ToPly(req.file.path);
+        // const plyFilePath = await convertMp4ToPly(req.file.path);
         
         // Convert the resulting PLY file to a string
-        const plyString = await convertPlyToString(plyFilePath);
+        // const plyString = await convertPlyToString(plyFilePath);
 
         // Create metadata with PLY data included
         const metadata = {
