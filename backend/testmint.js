@@ -1,34 +1,37 @@
 import { mintNFT } from "./index.js";
 import { uploadMetadataToIPFS } from "./testupload.js";
 
-async function testMint() {
-  // Define metadata with additional "splat" details
-  const metadata = {
-    name: "Test NFT",
-    description: "A test NFT with splat details",
-    symbol: "TNFT",
-    splat: {
-      points: 100, // Example value
-      resolution: "1024x768", // Example value
-      size: "500KB", // Example value
-    },
-  };
+async function testMint(name, symbol, points, resolution, size) {
+  // Define metadata with dynamic "splat" details
+    const metadata = {
+        name: name,
+        description: "A test NFT with splat details",
+        symbol: symbol,
+        supercalifragilisticexpialidocious: { //Requirements for the NFT
+        points: points,
+        resolution: resolution,
+        size: size,
+        },
+    };
 
-  // Upload metadata to IPFS and retrieve the URI (CID)
-  const metadataUri = await uploadMetadataToIPFS(metadata);
+    // Upload metadata to IPFS and retrieve the URI (CID)
+    const metadataUri = await uploadMetadataToIPFS(metadata);
 
-  // Mint the NFT with the metadata URI and retrieve the NFT details
-  const nft = await mintNFT(metadataUri, metadata.name, metadata.symbol);
+    // Mint the NFT with the metadata URI and retrieve the NFT details
+    const nft = await mintNFT(metadataUri, metadata.name, metadata.symbol);
 
-  // Log the entire NFT object to examine its structure
-  // console.log('NFT Object:', nft);
-
-  // Log the NFT details including splat details if `updateAuthority` is available
-  console.log("NFT Minted:", {
+    // Log the NFT details
+    console.log("NFT Minted:", {
     name: nft.name,
     owner: nft.updateAuthority, // NFT owner address
-    splat: metadata.splat,
-  });
+    splat: metadata.supercalifragilisticexpialidocious,
+    });
 }
 
-testMint().catch(console.error);
+// Example usage with dynamic values
+testMint("Test NFT", "TNFT", 150, "1920x1080", "700KB")
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+});
