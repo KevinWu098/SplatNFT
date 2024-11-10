@@ -2,6 +2,10 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+    timelineData,
+    TimelineLayout,
+} from "@/components/ui/timeline/timeline-layout";
+import {
     ApertureIcon,
     FileAxis3DIcon,
     GripIcon,
@@ -73,7 +77,11 @@ export function Panel() {
                 </TabsContent>
 
                 <TabsContent value="history">
-                    Change your password here.
+                    <div className="space-y-2">
+                        <div className="ml-12">
+                            <TimelineLayout items={timelineData} />
+                        </div>
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>
