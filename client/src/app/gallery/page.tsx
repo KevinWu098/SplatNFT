@@ -5,6 +5,7 @@ import { GalleryItem, galleryItems } from "@/components/gallery/gallery-item";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import JSZip from "jszip";
 
 export default function Page() {
     const [videoFile, setVideoFile] = useState<File>();
@@ -15,6 +16,40 @@ export default function Page() {
     };
 
     async function mintNFT(videoFile: File) {
+        // const testResponse = await fetch(
+        //     `https://58171d214b13.ngrok.app/test`,
+        //     {
+        //         method: "GET",
+        //     }
+        // );
+
+        // const testResult = await testResponse.json();
+        // console.log("test result", testResult);
+
+        // const testNftResponse = await fetch(
+        //     `https://58171d214b13.ngrok.app/download-nft/${testResult.ipfsCid}`,
+        //     {
+        //         method: "GET",
+        //     }
+        // );
+
+        // const blob = await testNftResponse.blob();
+
+        // // Create a JSZip instance and load the Blob
+        // const zip = new JSZip();
+        // const zipContents = await zip.loadAsync(blob);
+
+        // // Iterate over the files in the ZIP and extract their content
+        // for (const fileName in zipContents.files) {
+        //     const file = zipContents.files[fileName];
+
+        //     if (!file.dir) {
+        //         // If it's not a directory
+        //         const content = await file.async("string"); // Or "blob"/"arraybuffer" if needed
+        //         console.log(`File: ${fileName}, Content: ${content}`);
+        //     }
+        // }
+
         const formData = new FormData();
         formData.append("video", videoFile);
 
@@ -35,6 +70,20 @@ export default function Page() {
             // Handle success or errors
             if (response.ok) {
                 console.log("NFT minted successfully!");
+                try {
+                    const nftResponse = await fetch(
+                        `https://58171d214b13.ngrok.app/download-nft/${result.ipfsCid}`,
+                        {
+                            method: "GET",
+                        }
+                    );
+
+                    const nftResult = await nftResponse.json();
+
+                    console.log("nft result", nftResult);
+                } catch (e) {
+                    console.log("get minted nft failed:", e);
+                }
             } else {
                 console.error("Error minting NFT:", result);
             }
