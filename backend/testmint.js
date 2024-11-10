@@ -1,40 +1,63 @@
-import { mintNFT } from "./index.js";
-import { uploadMetadataToIPFS } from "./testupload.js";
+// Import necessary modules
+import { readFileSync } from "fs";
+import path from "path";
+import dotenv from "dotenv";
+import { create } from "@web3-storage/w3up-client";
 
-async function testMint(name, symbol, points, resolution, size) {
-  // Define metadata with dynamic "splat" details
-    const metadata = {
-        name: name,
-        description: "A test NFT with splat details",
-        symbol: symbol,
-        supercalifragilisticexpialidocious: { //Requirements for the NFT
-            points: points,
-            resolution: resolution,
-            size: size,
-        },
-    };
 
-    // Log metadata to verify structure
-    console.log("Generated Metadata:", metadata);
+dotenv.config(); // Load environment variables from .env
 
-    // Upload metadata to IPFS and retrieve the URI (CID)
-    const metadataUri = await uploadMetadataToIPFS(metadata);
+async function testMintPLY(name, symbol, plyFilename) {
+    console.log("Starting testMintPLY function...");
 
-    // Mint the NFT with the metadata URI and retrieve the NFT details
-    const nft = await mintNFT(metadataUri, metadata.name, metadata.symbol);
+    // Read the PLY file
+    console.log(`Reading PLY file from uploads/${plyFilename}...`);
+    const plyPath = path.join("uploads", plyFilename);
+    const plyData = readFileSync(plyPath);
+    const plySize = `${(plyData.length / 1024).toFixed(2)}KB`;
+    console.log(`PLY file size: ${plySize}`);
 
-    // Log the NFT details
-    console.log("NFT Minted:", {
-    name: nft.name,
-    owner: nft.updateAuthority, // NFT owner address
-    splat: metadata.supercalifragilisticexpialidocious,
+    // Create File object from PLY data
+    console.log("Creating File object from PLY data...");
+    const plyFile = new File([plyData], plyFilename, {
+        type: "application/octet-stream"
     });
+    console.log("PLY File object created successfully");
+
+    // Initialize w3up client
+    console.log("Initializing w3up client...");
+    const client = await create();
+    console.log("Logging in to w3up client...");
+    await client.login("aurelia.sindhu@gmail.com");
+    console.log("Setting current space...");
+    await client.setCurrentSpace(process.env.WEB3_STORAGE_API_KEY);
+    console.log("W3up client initialized and configured");
+
+    console.log("Creating metadata object...");
+    const metadata = {
+        name: "Hi",
+        description: "Test"
+    }
+    console.log("Metadata object created");
+
+    console.log("Creating metadata file...");
+    const blob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    const plyMetadata = new File([blob], plyFilename + "_metadata.json")
+    console.log("Metadata file created");
+
+    console.log("Uploading files to IPFS...");
+    const directoryCid = await client.uploadDirectory([
+        plyFile,
+        plyMetadata
+    ])
+    console.log("Directory CID:", directoryCid.toString());
+
 }
 
-// Example usage with dynamic values
-testMint("Test NFT", "TNFT", 150, "1920x1080", "700KB")
+// Example usage with PLY file
+testMintPLY("Point Cloud NFT", "PCNFT", "point_cloud.ply")
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
         process.exit(1);
-});
+    });
