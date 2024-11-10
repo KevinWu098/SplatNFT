@@ -1,190 +1,105 @@
 import express from 'express';
-import {Anon, AnonSocksClient} from '@anyone-protocol/anyone-client';
+import multer from 'multer';
+import { Anon, AnonSocksClient } from '@anyone-protocol/anyone-client';
 import { Connection, clusterApiUrl, Keypair } from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
-import { Web3Storage, File } from 'web3.storage'; // Updated import
+import { Web3Storage, File } from 'web3.storage';
 import dotenv from 'dotenv';
+import fs from 'fs/promises';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json()); // To parse JSON
 
+// File upload configuration for multer
+const upload = multer({ dest: 'uploads/' });
+
 // ENV
 const {
     SOLANA_PRIVATE_KEY,
     SOLANA_NETWORK,
-    WEB3_STORAGE_API_KEY, // Updated variable name
-    PORT = 5000,
-} = process.env;
+    WEB3_STORAGE_API_KEY,
+    PORT = 5001,
+} = process.env; 
 
-//Initializa Anon and AnonSocksClient 
+// Initialize Anon and AnonSocksClient 
 const anon = new Anon();
 await anon.start();
 const anonClient = new AnonSocksClient(anon);
 
-async function uploadMetadataToIPFS(metadata) {
-    try{
-        console.log("Uploading metadata to IPFS via Web3.storage...");
+// Initialize Solana Wallet
+let secretKey;
+try {
+    secretKey = Uint8Array.from(JSON.parse(SOLANA_PRIVATE_KEY));
+} catch (error) {
+    console.error('Invalid SOLANA_PRIVATE_KEY format. It should be a JSON array.');
+    process.exit(1);
+}
 
-        // Convert metadata JSON to a File object
+const walletKeypair = Keypair.fromSecretKey(secretKey);
+
+// Initialize Solana Connection
+const connection = new Connection(
+    clusterApiUrl(SOLANA_NETWORK),
+    'confirmed'
+);
+
+// Initialize Metaplex Instance
+const metaplex = Metaplex.make(connection).use(keypairIdentity(walletKeypair));
+
+// Initialize Web3.storage Client
+const web3StorageClient = new Web3Storage({ token: WEB3_STORAGE_API_KEY });
+
+// Placeholder for MP4 to PLY conversion
+async function convertMp4ToPly(mp4FilePath) {
+    //Bill's code
+    return plyFilePath;
+}
+
+// Function to convert PLY file to string
+async function convertPlyToString(plyFilePath) {
+    try {
+        const plyData = await fs.readFile(plyFilePath, 'utf8');
+        return plyData.toString();
+    } catch (error) {
+        console.error('Error converting PLY file to string:', error);
+        throw new Error('Failed to convert PLY to string');
+    }
+}
+
+// Upload metadata to IPFS
+async function uploadMetadataToIPFS(metadata) {
+    try {
+        console.log("Uploading metadata to IPFS via Web3.storage...");
         const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
         const metadataFile = new File([metadataBlob], 'metadata.json');
-
-        // Prepare request options
-        const data = [metadataFile];
-        const url = `https://api.web3.storage/upload`;
-        const config = {
-            headers: {
-                Authorization: `Bearer ${WEB3_STORAGE_API_KEY}`,
-                'Content-Type': 'multipart/form-data',
-            },
-        };
-
-        // Send the request through AnonSocksClient
-        const response = await anonClient.post(url, data, config);
-        const cid = response.data.cid;
+        const cid = await web3StorageClient.put([metadataFile]);
 
         console.log('Metadata successfully uploaded to IPFS with CID:', cid);
-        return `ipfs://${cid}/metadata.json`; // Adjusted URI
+        return `ipfs://${cid}/metadata.json`;
     } catch (error) {
-        console.error('Error uploading metadata to IPFS via AnonSocksClient:', error);
+        console.error('Error uploading metadata to IPFS:', error);
         throw new Error('Failed to upload metadata to IPFS');
     }
 }
 
-app.post('/mint-nft', async (req, res) => {
-    try {
-        const { content, name, description, symbol, points, resolution, size } = req.body;
-
-        if (!content || !name || !description || !symbol) {
-            return res.status(400).json({ error: 'Missing required fields: content, name, description, symbol' });
-        }
-
-        const metadata = {
-            name: name,
-            description: description,
-            symbol: symbol,
-            supercalifragilisticexpialidocious: {
-                points: points,
-                resolution: resolution,
-                size: size,
-            },
-        };
-
-        // Upload metadata through AnonSocksClient
-        const metadataUri = await uploadMetadataToIPFS(metadata);
-        console.log('Metadata uploaded to IPFS:', metadataUri);
-
-        // Mint the NFT
-        const nft = await mintNFT(metadataUri, name, symbol);
-        console.log('NFT minted:', nft);
-
-        // Respond with NFT details through AnonSocksClient (optional)
-        const responseUrl = `http://your-frontend-url.com/api/nft-response`; // Example frontend URL for further handling
-        const responseData = {
-            nft: {
-                name: nft.name,
-                symbol: nft.symbol,
-                uri: nft.uri,
-                mintAddress: nft.address.toBase58(),
-                sellerFeeBasisPoints: nft.sellerFeeBasisPoints,
-                updateAuthority: nft.updateAuthority.toBase58(),
-                primarySaleHappened: nft.primarySaleHappened,
-            },
-            gaussianSplatData: metadata.supercalifragilisticexpialidocious,
-            metadataUri: metadataUri,
-        };
-        
-        await anonClient.post(responseUrl, responseData);
-
-        // Send regular HTTP response to client
-        res.status(200).json(responseData);
-
-    } catch (error) {
-        console.error('Error in /mint-nft:', error);
-        res.status(500).json({ error: 'Failed to mint NFT' });
-    }
-});
-
-process.on('exit', async () => {
-    await anon.stop();
-    console.log('Anon network stopped');
-});
-
-// // Validate ENV
-// if (!SOLANA_PRIVATE_KEY) {
-//     console.error('Missing SOLANA_PRIVATE_KEY in environment variables.');
-//     process.exit(1);
-// }
-// if (!WEB3_STORAGE_API_KEY) { // Updated validation
-//     console.error('Missing WEB3_STORAGE_API_KEY in environment variables.');
-//     process.exit(1);
-// }
-
-// // Initialize Solana Wallet
-// let secretKey;
-// try {
-//     secretKey = Uint8Array.from(JSON.parse(SOLANA_PRIVATE_KEY));
-// } catch (error) {
-//     console.error('Invalid SOLANA_PRIVATE_KEY format. It should be a JSON array.');
-//     process.exit(1);
-// }
-
-// const walletKeypair = Keypair.fromSecretKey(secretKey);
-
-// // Initialize Solana Connection
-// const connection = new Connection(
-//     clusterApiUrl(SOLANA_NETWORK),
-//     'confirmed'
-// );
-
-// // Initialize Metaplex Instance
-// const metaplex = Metaplex.make(connection).use(keypairIdentity(walletKeypair));
-
-// // Initialize Web3.storage Client
-// const web3StorageClient = new Web3Storage({ token: WEB3_STORAGE_API_KEY });
-
-// // Console log the wallet address
-// async function uploadMetadataToIPFS(metadata) {
-//     try {
-//         console.log("Uploading metadata to IPFS via Web3.storage...");
-
-//         // Convert metadata JSON to a File object
-//         const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
-//         const metadataFile = new File([metadataBlob], 'metadata.json');
-
-//         // Upload the File to Web3.storage
-//         const cid = await web3StorageClient.put([metadataFile], {
-//             // You can add additional options here if needed
-//             // e.g., wrapWithDirectory: false
-//         });
-
-//         console.log('Metadata successfully uploaded to IPFS with CID:', cid);
-//         return `ipfs://${cid}/metadata.json`; // Adjusted URI
-//     } catch (error) {
-//         console.error('Error uploading metadata to IPFS via Web3.storage:', error);
-//         throw new Error('Failed to upload metadata to IPFS');
-//     }
-// }
-
-export async function mintNFT(metadataUri, name, symbol, sellerFeeBasisPoints = 500) {
+// Mint NFT function
+async function mintNFT(metadataUri) {
     try {
         const nft = await metaplex.nfts().create({
             uri: metadataUri,
-            name: name,
-            symbol: symbol,
-            sellerFeeBasisPoints: sellerFeeBasisPoints,
-            maxSupply: 1, // For single NFTs
+            name: "PLY NFT",
+            symbol: "PLYNFT",
+            sellerFeeBasisPoints: 500,
+            maxSupply: 1,
         });
-        // Fetch the updateAuthority or set the owner if available
-        const updateAuthority = nft.updateAuthority ? nft.updateAuthority : "Unknown";
 
         return {
             name: nft.name,
             uri: nft.uri,
             symbol: nft.symbol,
-            updateAuthority, // Ensure updateAuthority is included in the return object
+            updateAuthority: nft.updateAuthority.toBase58(),
         };
     } catch (error) {
         console.error('Error minting NFT:', error);
@@ -192,61 +107,58 @@ export async function mintNFT(metadataUri, name, symbol, sellerFeeBasisPoints = 
     }
 }
 
-// // API Router
-// app.post('/mint-nft', async (req, res) => {
-//     try {
-//         const { content, name, description, symbol } = req.body;
+// Route for minting NFT with an MP4 input file
+app.post('/mint-nft', upload.single('video'), async (req, res) => {
+    console.log('Received request on /mint-nft');
+    try {
+        // Check if the file is present
+        if (!req.file) {
+            return res.status(400).json({ error: 'Missing required field: MP4 video file' });
+        }
 
-//         // Input Validation
-//         if (!content || !name || !description || !symbol) {
-//             return res.status(400).json({ error: 'Missing required fields: content, name, description, symbol' });
-//         }
+        // Convert the uploaded MP4 file to PLY format
+        const plyFilePath = await convertMp4ToPly(req.file.path);
+        
+        // Convert the resulting PLY file to a string
+        const plyString = await convertPlyToString(plyFilePath);
 
-//         // Create Metadata Object
-//         const metadata = {
-//             name: name,
-//             description: description,
-//             symbol: symbol,
-//             supercalifragilisticexpialidocious: {
-//                 points: points,
-//                 resolution: resolution,
-//                 size: size,
-//             },
-//         };
+        // Create metadata with PLY data included
+        const metadata = {
+            name: "PLY NFT",
+            description: "An NFT created with PLY data derived from an MP4 video",
+            symbol: "PLYNFT",
+            supercalifragilisticexpialidocious: {
+                plyData: plyString, // Store the PLY data as a string in metadata
+            },
+        };
 
-//         // Upload Metadata to IPFS
-//         const metadataUri = await uploadMetadataToIPFS(metadata);
-//         console.log('Metadata uploaded to IPFS:', metadataUri);
+        // Upload metadata to IPFS
+        const metadataUri = await uploadMetadataToIPFS(metadata);
+        console.log('Metadata uploaded to IPFS:', metadataUri);
 
-//         // Mint the NFT
-//         const nft = await mintNFT(metadataUri, name, symbol);
-//         console.log('NFT minted:', nft);
+        // Mint the NFT
+        const nft = await mintNFT(metadataUri);
+        console.log('NFT minted:', nft);
 
-//         // Respond with NFT details
-//         res.status(200).json({
-//             nft: {
-//                 name: nft.name,
-//                 symbol: nft.symbol,
-//                 uri: nft.uri,
-//                 mintAddress: nft.address.toBase58(),
-//                 sellerFeeBasisPoints: nft.sellerFeeBasisPoints,
-//                 updateAuthority: nft.updateAuthority.toBase58(),
-//                 primarySaleHappened: nft.primarySaleHappened,
-//             },
-//             gaussianSplatData: metadata.supercalifragilisticexpialidocious,
-//             metadataUri: metadataUri,
-//         });
-//     } catch (error) {
-//         console.error('Error in /mint-nft:', error);
-//         res.status(500).json({ error: 'Failed to mint NFT' });
-//     }
-// });
+        res.status(200).json({
+            nft: {
+                name: nft.name,
+                symbol: nft.symbol,
+                uri: nft.uri,
+                updateAuthority: nft.updateAuthority,
+            },
+            metadataUri,
+        });
 
-// // Start server
-// app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-// });
+    } catch (error) {
+        console.error('Error in /mint-nft:', error);
+        res.status(500).json({ error: 'Failed to mint NFT' });
+    }
+});
 
-// // Export functions for testing or other purposes
-// export { uploadMetadataToIPFS };
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
+export { uploadMetadataToIPFS, mintNFT };
