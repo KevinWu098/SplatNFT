@@ -73,7 +73,7 @@ async function uploadMetadataToIPFS(metadata) {
     }
 }
 
-async function mintNFT(metadataUri, name, symbol, sellerFeeBasisPoints = 500) {
+export async function mintNFT(metadataUri, name, symbol, sellerFeeBasisPoints = 500) {
     try {
         const nft = await metaplex.nfts().create({
             uri: metadataUri,
@@ -82,7 +82,15 @@ async function mintNFT(metadataUri, name, symbol, sellerFeeBasisPoints = 500) {
             sellerFeeBasisPoints: sellerFeeBasisPoints,
             maxSupply: 1, // For single NFTs
         });
-        return nft;
+        // Fetch the updateAuthority or set the owner if available
+        const updateAuthority = nft.updateAuthority ? nft.updateAuthority : "Unknown";
+
+        return {
+            name: nft.name,
+            uri: nft.uri,
+            symbol: nft.symbol,
+            updateAuthority, // Ensure updateAuthority is included in the return object
+        };
     } catch (error) {
         console.error('Error minting NFT:', error);
         throw new Error('Failed to mint NFT');
@@ -149,5 +157,5 @@ app.listen(PORT, () => {
 });
 
 // Export functions for testing or other purposes
-export { uploadMetadataToIPFS, mintNFT };
+export { uploadMetadataToIPFS };
 

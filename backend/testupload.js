@@ -53,6 +53,7 @@ async function uploadMetadataToIPFS(metadata) {
     throw new Error("Failed to upload metadata to IPFS");
   }
 }
+export { uploadMetadataToIPFS };
 
 /**
  * Parses a base64-encoded CAR file into a Delegation object.
