@@ -737,6 +737,8 @@ let defaultViewMatrix = [
 ];
 let viewMatrix = defaultViewMatrix;
 async function main() {
+    return;
+
     let carousel = true;
     const params = new URLSearchParams(location.search);
     try {

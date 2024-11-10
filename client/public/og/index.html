@@ -19,7 +19,7 @@
             content="black-translucent"
         />
         <style>
-            body {
+            .webgl-viewer {
                 overflow: hidden;
                 margin: 0;
                 height: 100vh;
@@ -28,35 +28,35 @@
                 background: black;
                 text-shadow: 0 0 3px black;
             }
-            a,
-            body {
+            .webgl-viewer a,
+            .webgl-viewer {
                 color: white;
             }
-            #info {
+            .webgl-viewer #info {
                 z-index: 100;
                 position: absolute;
                 top: 10px;
                 left: 15px;
             }
-            h3 {
+            .webgl-viewer h3 {
                 margin: 5px 0;
             }
-            p {
+            .webgl-viewer p {
                 margin: 5px 0;
                 font-size: small;
             }
 
-            .cube-wrapper {
+            .webgl-viewer .cube-wrapper {
                 transform-style: preserve-3d;
             }
 
-            .cube {
+            .webgl-viewer .cube {
                 transform-style: preserve-3d;
                 transform: rotateX(45deg) rotateZ(45deg);
                 animation: rotation 2s infinite;
             }
 
-            .cube-faces {
+            .webgl-viewer .cube-faces {
                 transform-style: preserve-3d;
                 height: 80px;
                 width: 80px;
@@ -65,28 +65,28 @@
                 transform: translateX(0) translateY(0) translateZ(-40px);
             }
 
-            .cube-face {
+            .webgl-viewer .cube-face {
                 position: absolute;
                 inset: 0;
                 background: #0017ff;
                 border: solid 1px #ffffff;
             }
-            .cube-face.top {
+            .webgl-viewer .cube-face.top {
                 transform: translateZ(80px);
             }
-            .cube-face.front {
+            .webgl-viewer .cube-face.front {
                 transform-origin: 0 50%;
                 transform: rotateY(-90deg);
             }
-            .cube-face.back {
+            .webgl-viewer .cube-face.back {
                 transform-origin: 0 50%;
                 transform: rotateY(-90deg) translateZ(-80px);
             }
-            .cube-face.right {
+            .webgl-viewer .cube-face.right {
                 transform-origin: 50% 0;
                 transform: rotateX(-90deg) translateY(-80px);
             }
-            .cube-face.left {
+            .webgl-viewer .cube-face.left {
                 transform-origin: 50% 0;
                 transform: rotateX(-90deg) translateY(-80px) translateZ(80px);
             }
@@ -121,8 +121,8 @@
                 }
             }
 
-            .scene,
-            #message {
+            .webgl-viewer .scene,
+            .webgl-viewer #message {
                 position: absolute;
                 display: flex;
                 top: 0;
@@ -135,18 +135,18 @@
                 align-items: center;
                 justify-content: center;
             }
-            #message {
+            .webgl-viewer #message {
                 font-weight: bold;
                 font-size: large;
                 color: red;
                 pointer-events: none;
             }
 
-            details {
+            .webgl-viewer details {
                 font-size: small;
             }
 
-            #progress {
+            .webgl-viewer #progress {
                 position: absolute;
                 top: 0;
                 height: 5px;
@@ -155,20 +155,20 @@
                 transition: width 0.1s ease-in-out;
             }
 
-            #quality {
+            .webgl-viewer #quality {
                 position: absolute;
                 bottom: 10px;
                 z-index: 999;
                 right: 10px;
             }
 
-            #caminfo {
+            .webgl-viewer #caminfo {
                 position: absolute;
                 top: 10px;
                 z-index: 999;
                 right: 10px;
             }
-            #canvas {
+            .webgl-viewer #canvas {
                 display: block;
                 position: absolute;
                 top: 0;
@@ -178,91 +178,98 @@
                 touch-action: none;
             }
 
-            #instructions {
+            .webgl-viewer #instructions {
                 background: rgba(0, 0, 0, 0.6);
                 white-space: pre-wrap;
                 padding: 10px;
                 border-radius: 10px;
                 font-size: x-small;
             }
-            body.nohf .nohf {
+            .webgl-viewer.nohf .nohf {
                 display: none;
             }
-            body.nohf #progress,
-            body.nohf .cube-face {
+            .webgl-viewer.nohf #progress,
+            .webgl-viewer.nohf .cube-face {
                 background: #ff9d0d;
             }
         </style>
     </head>
     <body>
-        <script>
-            if (location.host.includes("hf.space"))
-                document.body.classList.add("nohf");
-        </script>
-        <div id="info">
-            <h3 class="nohf">WebGL 3D Gaussian Splat Viewer</h3>
-            <p>
-                <small class="nohf">
-                    By
-                    <a href="https://twitter.com/antimatter15">Kevin Kwok</a>.
-                    Code on
-                    <a href="https://github.com/antimatter15/splat">Github</a>.
-                </small>
-            </p>
+        <div class="webgl-viewer">
+            <script>
+                if (location.host.includes("hf.space"))
+                    document
+                        .querySelector(".webgl-viewer")
+                        .classList.add("nohf");
+            </script>
+            <!-- <div id="info">
+                <h3 class="nohf">WebGL 3D Gaussian Splat Viewer</h3>
+                <p>
+                    <small class="nohf">
+                        By
+                        <a href="https://twitter.com/antimatter15">Kevin Kwok</a
+                        >. Code on
+                        <a href="https://github.com/antimatter15/splat"
+                            >Github</a
+                        >.
+                    </small>
+                </p>
 
-            <details>
-                <summary>Use mouse or arrow keys to navigate.</summary>
+                <details>
+                    <summary>Use mouse or arrow keys to navigate.</summary>
 
-                <div id="instructions">
-                    movement (arrow keys) - left/right arrow keys to strafe side
-                    to side - up/down arrow keys to move forward/back - space to
-                    jump camera angle (wasd) - a/d to turn camera left/right -
-                    w/s to tilt camera up/down - q/e to roll camera
-                    counterclockwise/clockwise - i/k and j/l to orbit trackpad -
-                    scroll up/down/left/right to orbit - pinch to move
-                    forward/back - ctrl key + scroll to move forward/back -
-                    shift + scroll to move up/down or strafe mouse - click and
-                    drag to orbit - right click (or ctrl/cmd key) and drag
-                    up/down to move touch (mobile) - one finger to orbit - two
-                    finger pinch to move forward/back - two finger rotate to
-                    rotate camera clockwise/counterclockwise - two finger pan to
-                    move side-to-side and up-down gamepad - if you have a game
-                    controller connected it should work other - press 0-9 to
-                    switch to one of the pre-loaded camera views - press '-' or
-                    '+'key to cycle loaded cameras - press p to resume default
-                    animation - drag and drop .ply file to convert to .splat -
-                    drag and drop cameras.json to load cameras
-                </div>
-            </details>
-        </div>
+                    <div id="instructions">
+                        movement (arrow keys) - left/right arrow keys to strafe
+                        side to side - up/down arrow keys to move forward/back -
+                        space to jump camera angle (wasd) - a/d to turn camera
+                        left/right - w/s to tilt camera up/down - q/e to roll
+                        camera counterclockwise/clockwise - i/k and j/l to orbit
+                        trackpad - scroll up/down/left/right to orbit - pinch to
+                        move forward/back - ctrl key + scroll to move
+                        forward/back - shift + scroll to move up/down or strafe
+                        mouse - click and drag to orbit - right click (or
+                        ctrl/cmd key) and drag up/down to move touch (mobile) -
+                        one finger to orbit - two finger pinch to move
+                        forward/back - two finger rotate to rotate camera
+                        clockwise/counterclockwise - two finger pan to move
+                        side-to-side and up-down gamepad - if you have a game
+                        controller connected it should work other - press 0-9 to
+                        switch to one of the pre-loaded camera views - press '-'
+                        or '+'key to cycle loaded cameras - press p to resume
+                        default animation - drag and drop .ply file to convert
+                        to .splat - drag and drop cameras.json to load cameras
+                    </div>
+                </details>
+            </div> -->
 
-        <div id="progress"></div>
+            <div id="progress"></div>
 
-        <div id="message"></div>
-        <div
-            class="scene"
-            id="spinner"
-        >
-            <div class="cube-wrapper">
-                <div class="cube">
-                    <div class="cube-faces">
-                        <div class="cube-face bottom"></div>
-                        <div class="cube-face top"></div>
-                        <div class="cube-face left"></div>
-                        <div class="cube-face right"></div>
-                        <div class="cube-face back"></div>
-                        <div class="cube-face front"></div>
+            <div id="message"></div>
+            <div
+                class="scene"
+                id="spinner"
+            >
+                <div class="cube-wrapper">
+                    <div class="cube">
+                        <div class="cube-faces">
+                            <div class="cube-face bottom"></div>
+                            <div class="cube-face top"></div>
+                            <div class="cube-face left"></div>
+                            <div class="cube-face right"></div>
+                            <div class="cube-face back"></div>
+                            <div class="cube-face front"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <canvas id="canvas"></canvas>
+            <canvas id="canvas"></canvas>
 
-        <div id="quality">
-            <span id="fps"></span>
-        </div>
-        <div id="caminfo">
-            <span id="camid"></span>
+            <div id="quality">
+                <span id="fps"></span>
+            </div>
+            <div id="caminfo">
+                <span id="camid"></span>
+            </div>
         </div>
         <script src="./main.js"></script>
     </body>
