@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
 import cors from 'cors';
+import { exec } from 'child_process';
 
 dotenv.config();
 
@@ -121,8 +122,73 @@ app.post('/mint-nft', upload.single('video'), async (req, res) => {
             return res.status(400).json({ error: 'Missing required field: MP4 video file' });
         }
 
-        const savedVideoPath = path.join('uploads', req.file.originalname);
+        const savedVideoPath = path.join(req.file.originalname);
         await fs.rename(req.file.path, savedVideoPath);
+
+        // Clean up previous files and directories
+        try {
+            await fs.rm('timing.txt', { force: true });
+            await fs.rm('data', { recursive: true, force: true });
+            await fs.rm('trained_model', { recursive: true, force: true });
+            
+            // Create required directories
+            await fs.mkdir('data', { recursive: true });
+            await fs.mkdir('data/input', { recursive: true });
+            
+            // Run ffmpeg command to extract frames
+            const ffmpegCommand = `ffmpeg -i ${savedVideoPath} -vf fps=2 data/input/frame_%04d.png`;
+            
+            await new Promise((resolve, reject) => {
+                exec(ffmpegCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error executing ffmpeg: ${error}`);
+                        reject(error);
+                    }
+                    resolve();
+                });
+            });
+
+            console.log('Successfully extracted frames from video');
+
+            // Convert frames
+            const convertCommand = `xvfb-run python gaussian-splatting/convert.py -s data`;
+            await new Promise((resolve, reject) => {
+                exec(convertCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error converting frames: ${error}`);
+                        reject(error);
+                    }
+                    resolve();
+                });
+            });
+
+            console.log('Successfully converted frames');
+
+            // Train model
+            const trainCommand = `xvfb-run python gaussian-splatting/train.py -s data -m trained_model --iterations 7000`;
+            await new Promise((resolve, reject) => {
+                exec(trainCommand, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error training model: ${error}`);
+                        reject(error);
+                    }
+                    resolve();
+                });
+            });
+
+            console.log('Successfully trained model');
+
+            // Copy the trained model PLY file to current directory
+            const plySourcePath = path.join('trained_model', 'point_cloud', 'iteration_7000', 'point_cloud.ply');
+            const plyDestPath = 'point_cloud.ply';
+
+            await fs.copyFile(plySourcePath, plyDestPath);
+            console.log('Successfully copied PLY file to current directory');
+
+        } catch (error) {
+            console.error('Failed during video processing:', error);
+            throw new Error('Failed to process video file');
+        }
         // if (!req.file || req.file.mimetype !== 'video/mp4') {
         //     return res.status(400).json({ error: 'File is missing or is not an MP4 video' });
         // }        
