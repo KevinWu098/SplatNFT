@@ -1,0 +1,6 @@
+<<<<<<< HEAD
+.env
+=======
+backend/.env
+>>>>>>> d58dbb8d (update routing)
+**/*node_modules

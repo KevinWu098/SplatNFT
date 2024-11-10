@@ -1,9 +1,7 @@
 "use client";
 
-import { useRenderer } from "@/hooks/use-renderer";
+import { TextParallaxContentExample } from "@/components/hover-dev/text-parallax-content";
 
 export default function Page() {
-    const { renderer } = useRenderer();
-
-    return <div dangerouslySetInnerHTML={{ __html: renderer }} />;
+    return <TextParallaxContentExample />;
 }
