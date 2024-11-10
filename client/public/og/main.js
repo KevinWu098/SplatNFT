@@ -737,8 +737,6 @@ let defaultViewMatrix = [
 ];
 let viewMatrix = defaultViewMatrix;
 async function main() {
-    return;
-
     let carousel = true;
     const params = new URLSearchParams(location.search);
     try {
@@ -749,7 +747,8 @@ async function main() {
         // "nike.splat",
         // location.href,
         params.get("url") || "train.splat",
-        "https://huggingface.co/cakewalk/splat-data/resolve/main/"
+        location.href
+        // "https://huggingface.co/cakewalk/splat-data/resolve/main/"
     );
     const req = await fetch(url, {
         mode: "cors", // no-cors, *cors, same-origin
