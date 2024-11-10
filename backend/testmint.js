@@ -8,11 +8,14 @@ async function testMint(name, symbol, points, resolution, size) {
         description: "A test NFT with splat details",
         symbol: symbol,
         supercalifragilisticexpialidocious: { //Requirements for the NFT
-        points: points,
-        resolution: resolution,
-        size: size,
+            points: points,
+            resolution: resolution,
+            size: size,
         },
     };
+
+    // Log metadata to verify structure
+    console.log("Generated Metadata:", metadata);
 
     // Upload metadata to IPFS and retrieve the URI (CID)
     const metadataUri = await uploadMetadataToIPFS(metadata);
