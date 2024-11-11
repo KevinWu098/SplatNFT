@@ -87,10 +87,16 @@ export const galleryItems: GalleryItem[] = [
     },
     {
         id: 2,
-        src: "/jas.png",
-        name: "Saluting at Sunset",
-        description: "A girl saluting in the park at sunset",
+        src: "/table.png",
+        name: "Hard at Work",
+        description: "The SplatNFT team devving >:)",
     },
+    // {
+    //     id: 2,
+    //     src: "/jas.png",
+    //     name: "Saluting at Sunset",
+    //     description: "A girl saluting in the park at sunset",
+    // },
     {
         id: 3,
         src: "/bonsai.png",
@@ -102,5 +108,11 @@ export const galleryItems: GalleryItem[] = [
         src: "/nc.png",
         name: "Natural Disaster Strikes",
         description: "The aftermath of a natural disaster",
+    },
+    {
+        id: 5,
+        src: "/lia.png",
+        name: "Teammate Lia",
+        description: "It's Lia!",
     },
 ];

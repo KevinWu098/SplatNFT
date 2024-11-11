@@ -4,7 +4,7 @@ import { Renderer } from "@/components/renderer/renderer";
 export default function Page() {
     return (
         <div className="overflow-hidden">
-            {/* <Panel /> */}
+            <Panel />
 
             <Renderer />
         </div>
