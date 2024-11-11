@@ -1,6 +1,6 @@
 # [SplatNFT](https://devpost.com/software/splatnft)
 
-> ### Gaussian Splatting
+> ### Gaussian Splatting + NFTs
 
 <p align="center">
   Frontend built with: <br>
@@ -27,6 +27,6 @@
 
 <p align="center">
     <a href="https://devpost.com/software/splatnft">
-        <img width="1728" alt="Splash" src="https://github.com/KevinWu098/kTemp/assets/100006999/b477ecea-3c48-4d75-9eb0-33c682761c7a">
+        <img width="1728" alt="Splash" src="https://github.com/user-attachments/assets/6a45d336-64fa-435f-ba2e-dc9340ccf432">
     </a>
 </p>
