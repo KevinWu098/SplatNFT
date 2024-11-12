@@ -27,6 +27,6 @@
 
 <p align="center">
     <a href="https://devpost.com/software/splatnft">
-        <img width="1728" alt="Splash" src="https://github.com/user-attachments/assets/6a45d336-64fa-435f-ba2e-dc9340ccf432">
+        <img width="1728" alt="Splash" src="https://github.com/user-attachments/assets/8c9f442e-add4-46a4-97b8-cbbbc92fbd28">
     </a>
 </p>
